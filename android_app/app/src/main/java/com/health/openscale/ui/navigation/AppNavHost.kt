@@ -97,7 +97,10 @@ fun AppNavHost(
                 .padding(innerPadding) // Apply padding from Scaffold.
                 .weight(1f)      // NavHost takes the remaining space in the Column.
         ) {
-            // Define all composable screens for navigation routes.
+            // De
+         composable(Routes.STEPS) {
+          StepCounterScreen()
+                }
             composable(Routes.OVERVIEW) {
                 OverviewScreen(
                     navController = navController,
