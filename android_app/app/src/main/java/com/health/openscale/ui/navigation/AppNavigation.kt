@@ -146,15 +146,15 @@ fun AppNavigation(sharedViewModel: SharedViewModel) {
 
     // Define the main navigation routes that appear in the navigation drawer
     val mainRoutes = listOf(
-        Routes.OVERVIEW,
-        Routes.STEPS,
-        Routes.GRAPH,
-        Routes.TABLE,
-        Routes.STATISTICS,
-        Routes.INSIGHTS,
-        Routes.SETTINGS
-        Routes.AI_CHAT,
-    )
+    Routes.OVERVIEW,
+    Routes.STEPS,
+    Routes.AI_CHAT,
+    Routes.GRAPH,
+    Routes.TABLE,
+    Routes.STATISTICS,
+    Routes.INSIGHTS,
+    Routes.SETTINGS
+)
 
     // Collect UI states from SharedViewModel
     val topBarTitleFromVM by sharedViewModel.topBarTitle.collectAsState()
