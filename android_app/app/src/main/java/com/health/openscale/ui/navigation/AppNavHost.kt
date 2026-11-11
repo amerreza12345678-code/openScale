@@ -17,7 +17,6 @@
  */
 package com.health.openscale.ui.navigation
 import com.health.openscale.ui.screen.steps.StepCounterScreen
-import com.health.openscale.ui.screen.steps.StepCounterScreen
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.layout.AnimatedPane
