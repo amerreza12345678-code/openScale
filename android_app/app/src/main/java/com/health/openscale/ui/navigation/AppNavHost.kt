@@ -75,7 +75,7 @@ import com.health.openscale.ui.screen.statistics.MeasurementComparisonScreen
 import com.health.openscale.ui.screen.statistics.StatisticsScreen
 import com.health.openscale.ui.screen.table.TableScreen
 import com.health.openscale.ui.shared.SharedViewModel
-
+import com.health.openscale.ui.screen.chat.AiChatScreen
 /**
  * Hosts the app's [NavHost] with all screen destinations. Extracted from
  * AppNavigation to keep that file focused on the drawer/scaffold shell.
@@ -106,6 +106,9 @@ composable(Routes.OVERVIEW) {
 }
 composable(Routes.STEPS) {
     StepCounterScreen()
+}
+composable(Routes.AI_CHAT) {
+    AiChatScreen()
 }
 composable(
     route = Routes.OVERVIEW_DRILLDOWN,
