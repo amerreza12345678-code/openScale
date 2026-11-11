@@ -153,6 +153,7 @@ fun AppNavigation(sharedViewModel: SharedViewModel) {
         Routes.STATISTICS,
         Routes.INSIGHTS,
         Routes.SETTINGS
+        Routes.AI_CHAT,
     )
 
     // Collect UI states from SharedViewModel
