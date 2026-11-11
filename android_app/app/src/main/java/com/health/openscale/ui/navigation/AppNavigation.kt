@@ -147,6 +147,7 @@ fun AppNavigation(sharedViewModel: SharedViewModel) {
     // Define the main navigation routes that appear in the navigation drawer
     val mainRoutes = listOf(
         Routes.OVERVIEW,
+        Routes.STEPS,
         Routes.GRAPH,
         Routes.TABLE,
         Routes.STATISTICS,
