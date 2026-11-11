@@ -40,6 +40,7 @@ object Routes {
     const val INSIGHTS = "insights"
     const val SETTINGS = "settings"
     const val STEPS = "steps"
+    const val AI_CHAT = "ai_chat"
     const val MEASUREMENT_DETAIL = "measurementDetail" // Not a main navigation item, but a route
 
     // Sub-pages (Settings Subgraph)
