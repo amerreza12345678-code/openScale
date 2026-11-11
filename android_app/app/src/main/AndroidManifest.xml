@@ -10,8 +10,8 @@
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
 
     <!-- openScale works fully offline: strip network access even if a library declares it. -->
-    <uses-permission android:name="android.permission.INTERNET" />
-
+     <uses-permission android:name="android.permission.INTERNET" />
+    
     <permission
         android:name="${applicationId}.READ_WRITE_DATA"
         android:description="@string/permission_read_write_data_description"
