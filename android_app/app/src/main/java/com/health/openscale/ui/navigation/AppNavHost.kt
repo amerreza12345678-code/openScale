@@ -17,6 +17,7 @@
  */
 package com.health.openscale.ui.navigation
 
+import com.health.openscale.ui.screen.steps.StepCounterScreen
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.layout.AnimatedPane
@@ -104,12 +105,7 @@ fun AppNavHost(
                     bluetoothViewModel = bluetoothViewModel
                 )
             }
-            composable(
-                route = Routes.OVERVIEW_DRILLDOWN,
-                arguments = listOf(
-                    navArgument("start") { type = NavType.LongType },
-                    navArgument("end")   { type = NavType.LongType }
-                )
+            
             ) { backStackEntry ->
                 OverviewScreen(
                     navController = navController,
