@@ -226,25 +226,66 @@ fun AiChatScreen() {
     }
 }
 
+private class GeminiHttpException(
+    val statusCode: Int,
+    message: String
+) : Exception(message)
+
 private suspend fun callGemini(
     apiKey: String,
     history: List<ChatLine>
 ): String = withContext(Dispatchers.IO) {
-    val endpoint =
-        URL("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent")
+    var lastError: Exception? = null
+
+    for (attempt in 0..2) {
+        try {
+            return@withContext requestGeminiOnce(apiKey, history)
+        } catch (e: Exception) {
+            lastError = e
+
+            val retryable =
+                e is java.io.IOException ||
+                (e is GeminiHttpException &&
+                    (e.statusCode == 429 || e.statusCode in 500..599))
+
+            if (!retryable || attempt == 2) {
+                throw e
+            }
+
+            kotlinx.coroutines.delay(
+                if (attempt == 0) 1_000L else 2_000L
+            )
+        }
+    }
+
+    throw (lastError ?: IllegalStateException("Gemini request failed"))
+}
+
+private fun requestGeminiOnce(
+    apiKey: String,
+    history: List<ChatLine>
+): String {
+    val endpoint = URL(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent"
+    )
     val connection = endpoint.openConnection() as HttpURLConnection
 
     try {
         connection.requestMethod = "POST"
-        connection.connectTimeout = 30_000
-        connection.readTimeout = 30_000
+        connection.connectTimeout = 20_000
+        connection.readTimeout = 60_000
         connection.doOutput = true
-        connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+        connection.setRequestProperty(
+            "Content-Type",
+            "application/json; charset=utf-8"
+        )
         connection.setRequestProperty("x-goog-api-key", apiKey)
 
         val contents = JSONArray()
         history.takeLast(12).forEach { line ->
-            val parts = JSONArray().put(JSONObject().put("text", line.text))
+            val parts = JSONArray().put(
+                JSONObject().put("text", line.text)
+            )
             contents.put(
                 JSONObject()
                     .put("role", if (line.fromUser) "user" else "model")
@@ -252,20 +293,19 @@ private suspend fun callGemini(
             )
         }
 
-        val body = JSONObject()
-            .put(
-                "systemInstruction",
+        val systemInstruction = JSONObject().put(
+            "parts",
+            JSONArray().put(
                 JSONObject().put(
-                    "parts",
-                    JSONArray().put(
-                        JSONObject().put(
-                            "text",
-                            "به فارسی پاسخ بده. پاسخ‌ها را روشن و محتاطانه بنویس. " +
-                                "تشخیص پزشکی نده و در صورت نگرانی، مراجعه به پزشک را پیشنهاد کن."
-                        )
-                    )
+                    "text",
+                    "به فارسی پاسخ بده. پاسخ‌ها را روشن و محتاطانه بنویس. " +
+                        "تشخیص پزشکی نده و در صورت نگرانی، مراجعه به پزشک را پیشنهاد کن."
                 )
             )
+        )
+
+        val body = JSONObject()
+            .put("systemInstruction", systemInstruction)
             .put("contents", contents)
 
         connection.outputStream.use {
@@ -273,20 +313,24 @@ private suspend fun callGemini(
         }
 
         val status = connection.responseCode
-        val stream = if (status in 200..299) {
-            connection.inputStream
+        val responseText = if (status in 200..299) {
+            connection.inputStream.bufferedReader().use { it.readText() }
         } else {
-            connection.errorStream
+            connection.errorStream?.bufferedReader()?.use { it.readText() }.orEmpty()
         }
-        val responseText = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
 
         if (status !in 200..299) {
-            val reason = runCatching {
+            val message = runCatching {
                 JSONObject(responseText)
-                    .getJSONObject("error")
-                    .getString("message")
+                    .optJSONObject("error")
+                    ?.optString("message")
+                    ?.takeIf { it.isNotBlank() }
             }.getOrNull()
-            throw IllegalStateException(reason ?: "HTTP $status")
+
+            throw GeminiHttpException(
+                statusCode = status,
+                message = message ?: "Gemini HTTP $status"
+            )
         }
 
         val parts = JSONObject(responseText)
@@ -295,20 +339,19 @@ private suspend fun callGemini(
             .getJSONObject("content")
             .getJSONArray("parts")
 
-        buildString {
-    for (i in 0 until parts.length()) {
-        val text = parts.getJSONObject(i).optString("text")
-        if (text.isNotBlank()) {
-            if (isNotEmpty()) append(" ")
-            append(text)
-        }
-    }
+        return buildString {
+            for (i in 0 until parts.length()) {
+                val text = parts.getJSONObject(i).optString("text")
+                if (text.isNotBlank()) {
+                    if (isNotEmpty()) append(" ")
+                    append(text)
+                }
+            }
         }.ifBlank { "پاسخی از Gemini دریافت نشد." }
     } finally {
         connection.disconnect()
     }
 }
-
 private object ApiKeyVault {
     private const val ALIAS = "openscale_gemini_key"
     private const val PREFS = "encrypted_ai_settings"
