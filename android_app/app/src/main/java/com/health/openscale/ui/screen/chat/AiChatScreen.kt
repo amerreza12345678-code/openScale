@@ -299,10 +299,10 @@ private suspend fun callGemini(
             for (i in 0 until parts.length()) {
                 val text = parts.getJSONObject(i).optString("text")
                 if (text.isNotBlank()) {
-                if (isNotEmpty()) append("
-                 ")
-                    append(text)
-                }
+                if (isNotEmpty()) append('
+                 ')
+                append(text)
+                   }
             }
         }.ifBlank { "پاسخی از Gemini دریافت نشد." }
     } finally {
