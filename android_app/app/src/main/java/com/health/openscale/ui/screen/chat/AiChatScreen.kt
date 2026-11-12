@@ -299,8 +299,8 @@ private suspend fun callGemini(
             for (i in 0 until parts.length()) {
                 val text = parts.getJSONObject(i).optString("text")
                 if (text.isNotBlank()) {
-                    if (isNotEmpty()) append("
-")
+                if (isNotEmpty()) append("
+                 ")
                     append(text)
                 }
             }
